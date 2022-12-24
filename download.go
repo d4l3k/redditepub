@@ -260,7 +260,7 @@ func run() error {
 			e.SetAuthor(author)
 
 			log.Printf("%s - %s: %s", *post.Title, author, nextPage)
-			body := *post.Selftext
+			body := "# " + *post.Title + "\n\n" + *post.Selftext
 
 			for _, comment := range (*doc)[1].Data.Children {
 				if comment.Data.Author == author {
@@ -280,9 +280,12 @@ func run() error {
 			nextPage = ""
 			cdoc.Find("a[href]").EachWithBreak(func(i int, elem *goquery.Selection) bool {
 				text := strings.ToLower(elem.Text())
-				if strings.Contains(text, "next") {
-					nextPage = elem.AttrOr("href", "")
-					return false
+				if strings.Contains(text, "next") || strings.Contains(text, "forward") {
+					href := elem.AttrOr("href", "")
+					if strings.Contains(href, "reddit.com") {
+						nextPage = href
+						return false
+					}
 				}
 				return true
 			})
